@@ -1,5 +1,5 @@
 [package]
-name = "seriko-parser"
+name = "shell-parser-surfaces-rs"
 version = "0.1.0"
 edition = "2021"
 authors = [ "tukinami seika" ]
