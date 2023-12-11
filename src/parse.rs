@@ -1,6 +1,6 @@
-//! Parses a [`Seriko`] from `&str`.
+//! Parses a [`ShellSurfaces`] from `&str`.
 //!
-//! [`Seriko`]: crate::ast::Seriko
+//! [`ShellSurfaces`]: crate::ast::Seriko
 use std::borrow::Cow;
 
 use nom::{
@@ -10,12 +10,13 @@ use nom::{
     sequence::{preceded, terminated, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
-use crate::{BraceContainer, Seriko};
+use crate::{BraceContainer, ShellSurfaces};
 
 use self::{
     charset::charset,
-    cursor::brace_seriko_cursor,
+    cursor::brace_shell_surfaces_cursor,
     descript::brace_descript,
     parts::{header_comments_func, whole_line_as_comment_line},
     surface::{brace_surface, brace_surface_append},
@@ -119,11 +120,11 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
 ///  assert_eq!(seriko.charset(), &Charset::ShiftJIS);
 ///  assert_eq!(seriko.braces().len(), 2);
 /// ```
-pub fn parse<'a>(input: &'a str) -> Result<Seriko, nom::Err<SerikoParseError>> {
-    seriko(input).map(|(_, v)| v)
+pub fn parse<'a>(input: &'a str) -> Result<ShellSurfaces, nom::Err<ShellParseError>> {
+    shell_surfaces(input).map(|(_, v)| v)
 }
 
-fn seriko<'a>(input: &'a str) -> IResult<&'a str, Seriko, SerikoParseError> {
+fn shell_surfaces<'a>(input: &'a str) -> IResult<&'a str, ShellSurfaces, ShellParseError> {
     map(
         tuple((
             header_comments_func(charset),
@@ -132,22 +133,22 @@ fn seriko<'a>(input: &'a str) -> IResult<&'a str, Seriko, SerikoParseError> {
             terminated(many0(whole_line_as_comment_line), eof),
         )),
         |(header_comments, c, b, footer_comments)| {
-            Seriko::new(header_comments, c, b, footer_comments)
+            ShellSurfaces::new(header_comments, c, b, footer_comments)
         },
     )(input)
 }
 
-fn braces<'a>(input: &'a str) -> IResult<&'a str, Vec<BraceContainer>, SerikoParseError> {
+fn braces<'a>(input: &'a str) -> IResult<&'a str, Vec<BraceContainer>, ShellParseError> {
     many0(brace)(input)
 }
 
-fn brace<'a>(input: &'a str) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+fn brace<'a>(input: &'a str) -> IResult<&'a str, BraceContainer, ShellParseError> {
     alt((
         brace_descript,
         brace_surface,
         brace_surface_append,
         brace_surface_alias,
-        brace_seriko_cursor,
+        brace_shell_surfaces_cursor,
         brace_tooltip,
     ))(input)
 }
@@ -285,7 +286,7 @@ descript
         }
     }
 
-    mod seriko {
+    mod shell_surfaces {
         use crate::Brace;
         use shell_parser_common_rs::charset::Charset;
 
@@ -336,7 +337,7 @@ collision3,154,311,248,362,Skirt
 }
 // aaa
 "#;
-            let (remain, result) = seriko(case).unwrap();
+            let (remain, result) = shell_surfaces(case).unwrap();
             assert_eq!(remain, "");
             assert_eq!(result.charset(), &Charset::ShiftJIS);
             assert!(matches!(
@@ -361,7 +362,7 @@ collision3,154,311,248,362,Skirt
             ));
 
             let case = "charset,UTF-8";
-            let (remain, result) = seriko(case).unwrap();
+            let (remain, result) = shell_surfaces(case).unwrap();
             assert_eq!(remain, "");
             assert_eq!(result.charset(), &Charset::UTF8);
             assert!(result.braces().is_empty());
@@ -370,19 +371,19 @@ collision3,154,311,248,362,Skirt
         #[test]
         fn failed_when_invalid_str() {
             let case = r#""#;
-            assert!(seriko(case).is_err());
+            assert!(shell_surfaces(case).is_err());
 
             let case = r#"descript
 {
 }"#;
-            assert!(seriko(case).is_err());
+            assert!(shell_surfaces(case).is_err());
 
             let case = r#"
 charset,Shift_JIS
 descript
 {
 "#;
-            assert!(seriko(case).is_err());
+            assert!(shell_surfaces(case).is_err());
         }
     }
 

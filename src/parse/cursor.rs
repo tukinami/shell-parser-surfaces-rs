@@ -8,7 +8,7 @@ use nom::{
 use shell_parser_common_rs::ShellParseError;
 
 use crate::{
-    ast::{GestureKind, SerikoCursor, SerikoCursorGesture},
+    ast::{GestureKind, ShellSurfacesCursor, ShellSurfacesCursorGesture},
     Brace, BraceContainer, SurfaceTargetCharacterId,
 };
 
@@ -16,31 +16,39 @@ use super::parts::{
     brace_name_func, digit, header_comments_func, inner_brace_func, surface_target_character_id,
 };
 
-pub(super) fn brace_seriko_cursor<'a>(
+pub(super) fn brace_shell_surfaces_cursor<'a>(
     input: &'a str,
 ) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
-        tuple((header_comments_func(seriko_cursor_name), seriko_cursor)),
+        tuple((
+            header_comments_func(shell_surfaces_cursor_name),
+            shell_surfaces_cursor,
+        )),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::Cursor(body)),
     )(input)
 }
 
-fn seriko_cursor<'a>(input: &'a str) -> IResult<&'a str, SerikoCursor, ShellParseError> {
+fn shell_surfaces_cursor<'a>(
+    input: &'a str,
+) -> IResult<&'a str, ShellSurfacesCursor, ShellParseError> {
     map(
-        tuple((seriko_cursor_name, inner_brace_func(seriko_cursor_define))),
-        |(id, lines)| SerikoCursor::new(id, lines),
+        tuple((
+            shell_surfaces_cursor_name,
+            inner_brace_func(shell_surfaces_cursor_define),
+        )),
+        |(id, lines)| ShellSurfacesCursor::new(id, lines),
     )(input)
 }
 
-fn seriko_cursor_name<'a>(
+fn shell_surfaces_cursor_name<'a>(
     input: &'a str,
 ) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     brace_name_func(terminated(surface_target_character_id, tag(".cursor")))(input)
 }
 
-fn seriko_cursor_define<'a>(
+fn shell_surfaces_cursor_define<'a>(
     input: &'a str,
-) -> IResult<&'a str, SerikoCursorGesture, ShellParseError> {
+) -> IResult<&'a str, ShellSurfacesCursorGesture, ShellParseError> {
     map(
         tuple((
             gesture_kind,
@@ -49,7 +57,7 @@ fn seriko_cursor_define<'a>(
             preceded(tag(","), is_not("\r\n")),
         )),
         |(kind, id, collision, filename)| {
-            SerikoCursorGesture::new(kind, id, collision.to_string(), filename.to_string())
+            ShellSurfacesCursorGesture::new(kind, id, collision.to_string(), filename.to_string())
         },
     )(input)
 }
@@ -68,7 +76,7 @@ fn gesture_kind<'a>(input: &'a str) -> IResult<&'a str, GestureKind, ShellParseE
 mod tests {
     use super::*;
 
-    mod brace_seriko_cursor {
+    mod brace_shell_surfaces_cursor {
         use crate::{CommentLine, LineContainer};
 
         use super::*;
@@ -86,7 +94,7 @@ mouseup1,Bust,system:hand
 mousedown1,Bust,system:grip
 }
 "#;
-            let (remain, result) = brace_seriko_cursor(case).unwrap();
+            let (remain, result) = brace_shell_surfaces_cursor(case).unwrap();
             assert_eq!(remain, "");
             assert_eq!(
                 result.header_comments(),
@@ -97,29 +105,29 @@ mousedown1,Bust,system:grip
             );
             assert_eq!(
                 result.body(),
-                &Brace::Cursor(SerikoCursor::new(
+                &Brace::Cursor(ShellSurfacesCursor::new(
                     crate::ast::SurfaceTargetCharacterId::Sakura,
                     vec![
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseUp,
                             0,
                             "Head".to_string(),
                             "system:hand".to_string()
                         )),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseDown,
                             0,
                             "Head".to_string(),
                             "system:finger".to_string()
                         )),
                         LineContainer::Comment(CommentLine::new("".to_string())),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseUp,
                             1,
                             "Bust".to_string(),
                             "system:hand".to_string()
                         )),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseDown,
                             1,
                             "Bust".to_string(),
@@ -142,11 +150,11 @@ mouseup1,Bust,system:hand
 mousedown1,Bust,system:grip
 }
 "#;
-            assert!(brace_seriko_cursor(case).is_err());
+            assert!(brace_shell_surfaces_cursor(case).is_err());
         }
     }
 
-    mod seriko_cursor {
+    mod shell_surfaces_cursor {
         use crate::{CommentLine, LineContainer};
 
         use super::*;
@@ -162,33 +170,33 @@ mouseup1,Bust,system:hand
 mousedown1,Bust,system:grip
 }
 "#;
-            let (remain, result) = seriko_cursor(case).unwrap();
+            let (remain, result) = shell_surfaces_cursor(case).unwrap();
             assert_eq!(remain, "");
             assert_eq!(
                 result,
-                SerikoCursor::new(
+                ShellSurfacesCursor::new(
                     crate::ast::SurfaceTargetCharacterId::Sakura,
                     vec![
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseUp,
                             0,
                             "Head".to_string(),
                             "system:hand".to_string()
                         )),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseDown,
                             0,
                             "Head".to_string(),
                             "system:finger".to_string()
                         )),
                         LineContainer::Comment(CommentLine::new("".to_string())),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseUp,
                             1,
                             "Bust".to_string(),
                             "system:hand".to_string()
                         )),
-                        LineContainer::Body(SerikoCursorGesture::new(
+                        LineContainer::Body(ShellSurfacesCursorGesture::new(
                             GestureKind::MouseDown,
                             1,
                             "Bust".to_string(),
@@ -202,17 +210,17 @@ mousedown1,Bust,system:grip
         #[test]
         fn failed_when_invalid_str() {
             let case = r#"sakuracursor{}"#;
-            assert!(seriko_cursor(case).is_err());
+            assert!(shell_surfaces_cursor(case).is_err());
         }
     }
 
-    mod seriko_cursor_name {
+    mod shell_surfaces_cursor_name {
         use super::*;
 
         #[test]
         fn success_when_valid_str() {
             let case = "sakura.cursor\r\n{";
-            let (remain, result) = seriko_cursor_name(case).unwrap();
+            let (remain, result) = shell_surfaces_cursor_name(case).unwrap();
             assert_eq!(remain, "{");
             assert_eq!(result, SurfaceTargetCharacterId::Sakura);
         }
@@ -220,21 +228,21 @@ mousedown1,Bust,system:grip
         #[test]
         fn failed_when_invalid_str() {
             let case = "hoge.cursor\r\n";
-            assert!(seriko_cursor_name(case).is_err());
+            assert!(shell_surfaces_cursor_name(case).is_err());
         }
     }
 
-    mod seriko_cursor_define {
+    mod shell_surfaces_cursor_define {
         use super::*;
 
         #[test]
         fn success_when_valid_str() {
             let case = "mouseup0,Head,system:hand";
-            let (remain, result) = seriko_cursor_define(case).unwrap();
+            let (remain, result) = shell_surfaces_cursor_define(case).unwrap();
             assert_eq!(remain, "");
             assert_eq!(
                 result,
-                SerikoCursorGesture::new(
+                ShellSurfacesCursorGesture::new(
                     GestureKind::MouseUp,
                     0,
                     "Head".to_string(),
@@ -246,7 +254,7 @@ mousedown1,Bust,system:grip
         #[test]
         fn failed_when_invalid_str() {
             let case = "mouseup0,Head,\r\n";
-            assert!(seriko_cursor_define(case).is_err());
+            assert!(shell_surfaces_cursor_define(case).is_err());
         }
     }
 

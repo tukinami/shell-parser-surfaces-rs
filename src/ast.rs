@@ -1,4 +1,4 @@
-//! AST for `SERIKO`.
+//! AST for `ShellSurfaces`.
 
 use shell_parser_common_rs::charset::Charset;
 
@@ -12,9 +12,9 @@ pub type CollisionIdType = AnimationIdType;
 pub type AnimationPatternIdType = AnimationIdType;
 pub type CursorMouseIdType = AnimationIdType;
 
-/// Root of `SERIKO`.
+/// Root of `ShellSurfaces`.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Seriko {
+pub struct ShellSurfaces {
     header_comments: Vec<CommentLine>,
     charset: Charset,
     braces: Vec<BraceContainer>,
@@ -44,7 +44,7 @@ pub enum Brace {
     Surface(Surface),
     SurfaceAppend(SurfaceAppend),
     SurfaceAlias(SurfaceAlias),
-    Cursor(SerikoCursor),
+    Cursor(ShellSurfacesCursor),
     Tooltip(Tooltip),
 }
 
@@ -267,13 +267,13 @@ pub struct SurfaceAliasInner {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SerikoCursor {
+pub struct ShellSurfacesCursor {
     id: SurfaceTargetCharacterId,
-    lines: Vec<LineContainer<SerikoCursorGesture>>,
+    lines: Vec<LineContainer<ShellSurfacesCursorGesture>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SerikoCursorGesture {
+pub struct ShellSurfacesCursorGesture {
     kind: GestureKind,
     id: CursorMouseIdType,
     target_collistion: String,
@@ -301,14 +301,14 @@ pub struct TooltipInner {
     description: String,
 }
 
-impl Seriko {
+impl ShellSurfaces {
     pub fn new(
         header_comments: Vec<CommentLine>,
         charset: Charset,
         braces: Vec<BraceContainer>,
         footer_comments: Vec<CommentLine>,
-    ) -> Seriko {
-        Seriko {
+    ) -> ShellSurfaces {
+        ShellSurfaces {
             header_comments,
             charset,
             braces,
@@ -623,30 +623,30 @@ impl SurfaceAliasInner {
     }
 }
 
-impl SerikoCursor {
+impl ShellSurfacesCursor {
     pub fn new(
         id: SurfaceTargetCharacterId,
-        lines: Vec<LineContainer<SerikoCursorGesture>>,
-    ) -> SerikoCursor {
-        SerikoCursor { id, lines }
+        lines: Vec<LineContainer<ShellSurfacesCursorGesture>>,
+    ) -> ShellSurfacesCursor {
+        ShellSurfacesCursor { id, lines }
     }
 
     pub fn id(&self) -> &SurfaceTargetCharacterId {
         &self.id
     }
-    pub fn lines(&self) -> &Vec<LineContainer<SerikoCursorGesture>> {
+    pub fn lines(&self) -> &Vec<LineContainer<ShellSurfacesCursorGesture>> {
         &self.lines
     }
 }
 
-impl SerikoCursorGesture {
+impl ShellSurfacesCursorGesture {
     pub fn new(
         kind: GestureKind,
         id: CursorMouseIdType,
         target_collistion: String,
         filename: String,
-    ) -> SerikoCursorGesture {
-        SerikoCursorGesture {
+    ) -> ShellSurfacesCursorGesture {
+        ShellSurfacesCursorGesture {
             kind,
             id,
             target_collistion,
