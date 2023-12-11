@@ -31,8 +31,6 @@ mod surface;
 mod surface_alias;
 mod tooltip;
 
-pub type SerikoParseError<'a> = nom::error::VerboseError<&'a str>;
-
 /// Decodes bytes to `Cow<'a, str>` from specified charset.
 ///
 /// # Examples
@@ -40,7 +38,7 @@ pub type SerikoParseError<'a> = nom::error::VerboseError<&'a str>;
 /// ```
 /// use encoding_rs::SHIFT_JIS;
 ///
-/// use seriko_parser::decode_bytes;
+/// use shell_parser_surfaces_rs::decode_bytes;
 ///
 /// let case_raw = r#"
 /// charset,Shift_JIS
@@ -83,15 +81,15 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
     }
 }
 
-/// Parses a [`Seriko`] from `&str`.
+/// Parses a [`ShellSurfaces`] from `&str`.
 ///
-/// [`Seriko`]: crate::ast::Seriko
+/// [`ShellSurfaces`]: crate::ast::Seriko
 ///
 /// # Examples
 ///
 /// ```
-/// use seriko_parser::Charset;
-/// use seriko_parser::parse;
+/// use shell_parser_common_rs::charset::Charset;
+/// use shell_parser_surfaces_rs::parse;
 ///
 /// let case = r#"charset,Shift_JIS
 ///

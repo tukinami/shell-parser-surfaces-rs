@@ -6,7 +6,7 @@
 //!
 //! ```
 //! use std::{fs::File, io::Read, path::PathBuf};
-//! use seriko_parser::{decode_bytes, parse};
+//! use shell_parser_surfaces_rs::{decode_bytes, parse};
 //!
 //! let file_path =
 //!     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_target/surfaces/surface01.txt");
