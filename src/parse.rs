@@ -1,6 +1,6 @@
 //! Parses a [`ShellSurfaces`] from `&str`.
 //!
-//! [`ShellSurfaces`]: crate::ast::Seriko
+//! [`ShellSurfaces`]: crate::ast::ShellSurfaces
 use std::borrow::Cow;
 
 use nom::{
@@ -84,7 +84,7 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
 
 /// Parses a [`ShellSurfaces`] from `&str`.
 ///
-/// [`ShellSurfaces`]: crate::ast::Seriko
+/// [`ShellSurfaces`]: crate::ast::ShellSurfaces
 ///
 /// # Examples
 ///
@@ -109,7 +109,7 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
 /// }
 /// "#;
 ///
-/// let seriko = match parse(case) {
+/// let shell_surfaces = match parse(case) {
 ///      Ok(v) => v,
 ///      Err(e) => {
 ///          eprintln!("{:?}", e);
@@ -117,8 +117,8 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
 ///      }
 ///  };
 ///
-///  assert_eq!(seriko.charset(), &Charset::ShiftJIS);
-///  assert_eq!(seriko.braces().len(), 2);
+///  assert_eq!(shell_surfaces.charset(), &Charset::ShiftJIS);
+///  assert_eq!(shell_surfaces.braces().len(), 2);
 /// ```
 pub fn parse<'a>(input: &'a str) -> Result<ShellSurfaces, nom::Err<ShellParseError>> {
     shell_surfaces(input).map(|(_, v)| v)

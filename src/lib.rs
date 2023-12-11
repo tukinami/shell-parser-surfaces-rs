@@ -32,14 +32,14 @@
 //!     }
 //! };
 //!
-//! let seriko = match parse(&content) {
+//! let shell_surfaces = match parse(&content) {
 //!     Ok(v) => v,
 //!     Err(e) => {
 //!         eprintln!("{:?}", e);
 //!         return;
 //!     }
 //! };
-//! assert!(!seriko.braces().is_empty());
+//! assert!(!shell_surfaces.braces().is_empty());
 //! ```
 
 pub mod ast;
