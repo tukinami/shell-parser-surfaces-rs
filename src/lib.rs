@@ -1,6 +1,6 @@
-//! # SERIKO Parser
+//! # shell-parser-surfaces-rs
 //!
-//! `SERIKO Parser` is a parser for `SERIKO` used in Ukagaka as `surfaces.txt`.
+//! Parse surfaces.txt for shell settings on Ukagaka.
 //!
 //! ## Example
 //!

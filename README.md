@@ -1,14 +1,14 @@
-# SERIKO Parser
+# shell-parser-surfaces-rs
 
-[GitHub Repository](https://github.com/tukinami/seriko-parser)
+[GitHub Repository](https://github.com/tukinami/shell-parser-surfaces-rs)
 
-Parse `SERIKO` for ukagaka as `surfaces.txt`.
+Parse surfaces.txt for shell settings on Ukagaka.
 
 ## Usage
 
 ``` rust
 use std::{fs::File, io::Read, path::PathBuf};
-use seriko_parser::{decode_bytes, parse};
+use shell_parser_surfaces_rs::{decode_bytes, parse};
 
 let file_path =
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_target/surfaces/surface01.txt");
@@ -34,14 +34,14 @@ let content = match decode_bytes(&buffer) {
     }
 };
 
-let seriko = match parse(&content) {
+let shell_surfaces = match parse(&content) {
     Ok(v) => v,
     Err(e) => {
         eprintln!("{:?}", e);
         return;
     }
 };
-assert!(!seriko.braces().is_empty());
+assert!(!shell_surfaces.braces().is_empty());
 ```
 
 ## Licese
