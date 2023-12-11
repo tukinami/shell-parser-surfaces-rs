@@ -11,3 +11,4 @@ description = "Parse SERIKO for ukagaka as surfaces.txt."
 [dependencies]
 encoding_rs = "0.8.33"
 nom = "7.1.3"
+shell-parser-common-rs = { git = "https://github.com/tukinami/shell-parser-common-rs.git", branch = "main" }

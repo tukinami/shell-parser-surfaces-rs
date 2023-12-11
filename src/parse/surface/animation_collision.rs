@@ -4,17 +4,18 @@ use nom::{
     sequence::{preceded, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{SurfaceAnimationCollision, SurfaceAnimationCollisionEx},
-    parse::{parts::digit, SerikoParseError},
+    parse::parts::digit,
 };
 
 use super::collision::{collision, collision_ex};
 
 pub(super) fn animation_collision<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationCollision, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationCollision, ShellParseError> {
     map(
         tuple((
             preceded(tag("animation"), digit),
@@ -26,7 +27,7 @@ pub(super) fn animation_collision<'a>(
 
 pub(super) fn animation_collision_ex<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationCollisionEx, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationCollisionEx, ShellParseError> {
     map(
         tuple((
             preceded(tag("animation"), digit),

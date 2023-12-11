@@ -4,18 +4,16 @@ use nom::{
     sequence::{preceded, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::SurfaceElement,
-    parse::{
-        parts::{digit, digit_neg},
-        SerikoParseError,
-    },
+    parse::parts::{digit, digit_neg},
 };
 
 use super::draw_method::draw_method;
 
-pub(super) fn element<'a>(input: &'a str) -> IResult<&'a str, SurfaceElement, SerikoParseError> {
+pub(super) fn element<'a>(input: &'a str) -> IResult<&'a str, SurfaceElement, ShellParseError> {
     map(
         tuple((
             tag("element"),

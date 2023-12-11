@@ -6,13 +6,14 @@ use nom::{
     sequence::{delimited, pair, terminated},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{AnimationIdType, DrawMethod, DrawMethodOnAnimation},
-    parse::{parts::digit, SerikoParseError},
+    parse::parts::digit,
 };
 
-pub(super) fn draw_method<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+pub(super) fn draw_method<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     alt((
         draw_method_base,
         draw_method_overlayfast,
@@ -30,7 +31,7 @@ pub(super) fn draw_method<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, Se
 
 pub(super) fn draw_method_on_animation<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     alt((
         draw_method_insert,
         draw_method_start,
@@ -42,55 +43,55 @@ pub(super) fn draw_method_on_animation<'a>(
     ))(input)
 }
 
-fn draw_method_base<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_base<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("base"), |_| DrawMethod::Base)(input)
 }
 
-fn draw_method_overlay<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_overlay<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("overlay"), |_| DrawMethod::Overlay)(input)
 }
 
-fn draw_method_overlayfast<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_overlayfast<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("overlayfast"), |_| DrawMethod::Overlayfast)(input)
 }
 
 fn draw_method_overlaymultiply<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("overlaymultiply"), |_| DrawMethod::Overlaymultiply)(input)
 }
 
-fn draw_method_replace<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_replace<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("replace"), |_| DrawMethod::Replace)(input)
 }
 
-fn draw_method_interpolate<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_interpolate<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("interpolate"), |_| DrawMethod::Interpolate)(input)
 }
 
-fn draw_method_asis<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_asis<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("asis"), |_| DrawMethod::Asis)(input)
 }
 
-fn draw_method_move<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_move<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("move"), |_| DrawMethod::Move)(input)
 }
 
-fn draw_method_bind<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_bind<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("bind"), |_| DrawMethod::Bind)(input)
 }
 
-fn draw_method_add<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_add<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("add"), |_| DrawMethod::Add)(input)
 }
 
-fn draw_method_reduce<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, SerikoParseError> {
+fn draw_method_reduce<'a>(input: &'a str) -> IResult<&'a str, DrawMethod, ShellParseError> {
     map(tag("reduce"), |_| DrawMethod::Reduce)(input)
 }
 
 fn draw_method_insert<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("insert,"), digit), |(_, v)| {
         DrawMethodOnAnimation::Insert(v)
     })(input)
@@ -98,7 +99,7 @@ fn draw_method_insert<'a>(
 
 fn draw_method_start<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("start,"), digit), |(_, v)| {
         DrawMethodOnAnimation::Start(v)
     })(input)
@@ -106,7 +107,7 @@ fn draw_method_start<'a>(
 
 fn draw_method_stop<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("stop,"), digit), |(_, v)| {
         DrawMethodOnAnimation::Stop(v)
     })(input)
@@ -114,7 +115,7 @@ fn draw_method_stop<'a>(
 
 fn draw_method_alternativestart<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("alternativestart,"), ids), |(_, v)| {
         DrawMethodOnAnimation::Alternativestart(v)
     })(input)
@@ -122,7 +123,7 @@ fn draw_method_alternativestart<'a>(
 
 fn draw_method_alternativestop<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("alternativestop,"), ids), |(_, v)| {
         DrawMethodOnAnimation::Alternativestop(v)
     })(input)
@@ -130,7 +131,7 @@ fn draw_method_alternativestop<'a>(
 
 fn draw_method_parallelstart<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("parallelstart,"), ids), |(_, v)| {
         DrawMethodOnAnimation::Parallelstart(v)
     })(input)
@@ -138,41 +139,39 @@ fn draw_method_parallelstart<'a>(
 
 fn draw_method_parallelstop<'a>(
     input: &'a str,
-) -> IResult<&'a str, DrawMethodOnAnimation, SerikoParseError> {
+) -> IResult<&'a str, DrawMethodOnAnimation, ShellParseError> {
     map(pair(tag("parallelstop,"), ids), |(_, v)| {
         DrawMethodOnAnimation::Parallelstop(v)
     })(input)
 }
 
-fn ids<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     alt((ids_bracket, ids_parenthesis))(input)
 }
 
-fn ids_bracket<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids_bracket<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     delimited(tag("["), ids_inner, tag("]"))(input)
 }
 
-fn ids_parenthesis<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids_parenthesis<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     delimited(tag("("), ids_inner, tag(")"))(input)
 }
 
-fn ids_inner<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids_inner<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     alt((ids_inner_comma, ids_inner_period, map(digit, |v| vec![v])))(input)
 }
 
-fn ids_inner_comma<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids_inner_comma<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     ids_inner_body(",")(input)
 }
 
-fn ids_inner_period<'a>(
-    input: &'a str,
-) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+fn ids_inner_period<'a>(input: &'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     ids_inner_body(".")(input)
 }
 
 fn ids_inner_body<'a>(
     tag_str: &'static str,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<AnimationIdType>, SerikoParseError> {
+) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<AnimationIdType>, ShellParseError> {
     map(
         pair(many1(terminated(digit, tag(tag_str))), digit),
         |(mut vec, v)| {

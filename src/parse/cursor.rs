@@ -5,29 +5,27 @@ use nom::{
     sequence::{preceded, terminated, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{GestureKind, SerikoCursor, SerikoCursorGesture},
     Brace, BraceContainer, SurfaceTargetCharacterId,
 };
 
-use super::{
-    parts::{
-        brace_name_func, digit, header_comments_func, inner_brace_func, surface_target_character_id,
-    },
-    SerikoParseError,
+use super::parts::{
+    brace_name_func, digit, header_comments_func, inner_brace_func, surface_target_character_id,
 };
 
 pub(super) fn brace_seriko_cursor<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(seriko_cursor_name), seriko_cursor)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::Cursor(body)),
     )(input)
 }
 
-fn seriko_cursor<'a>(input: &'a str) -> IResult<&'a str, SerikoCursor, SerikoParseError> {
+fn seriko_cursor<'a>(input: &'a str) -> IResult<&'a str, SerikoCursor, ShellParseError> {
     map(
         tuple((seriko_cursor_name, inner_brace_func(seriko_cursor_define))),
         |(id, lines)| SerikoCursor::new(id, lines),
@@ -36,13 +34,13 @@ fn seriko_cursor<'a>(input: &'a str) -> IResult<&'a str, SerikoCursor, SerikoPar
 
 fn seriko_cursor_name<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     brace_name_func(terminated(surface_target_character_id, tag(".cursor")))(input)
 }
 
 fn seriko_cursor_define<'a>(
     input: &'a str,
-) -> IResult<&'a str, SerikoCursorGesture, SerikoParseError> {
+) -> IResult<&'a str, SerikoCursorGesture, ShellParseError> {
     map(
         tuple((
             gesture_kind,
@@ -56,7 +54,7 @@ fn seriko_cursor_define<'a>(
     )(input)
 }
 
-fn gesture_kind<'a>(input: &'a str) -> IResult<&'a str, GestureKind, SerikoParseError> {
+fn gesture_kind<'a>(input: &'a str) -> IResult<&'a str, GestureKind, ShellParseError> {
     alt((
         map(tag("mouseup"), |_| GestureKind::MouseUp),
         map(tag("mousedown"), |_| GestureKind::MouseDown),

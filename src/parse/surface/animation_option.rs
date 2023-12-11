@@ -6,10 +6,11 @@ use nom::{
     sequence::{delimited, preceded, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{AnimationOptionKind, SurfaceAnimationOption},
-    parse::{parts::digit, SerikoParseError},
+    parse::parts::digit,
 };
 
 enum AnimationOptionKindTemp {
@@ -20,13 +21,13 @@ enum AnimationOptionKindTemp {
 
 pub(super) fn animation_option<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationOption, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationOption, ShellParseError> {
     alt((animation_option_v0, animation_option_v1))(input)
 }
 
 fn animation_option_v0<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationOption, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationOption, ShellParseError> {
     map(
         tuple((digit, tag("option,"), animation_option_kinds)),
         |(id, _, options)| SurfaceAnimationOption::new(id, options),
@@ -35,7 +36,7 @@ fn animation_option_v0<'a>(
 
 fn animation_option_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationOption, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationOption, ShellParseError> {
     map(
         tuple((
             tag("animation"),
@@ -49,7 +50,7 @@ fn animation_option_v1<'a>(
 
 fn animation_option_kinds<'a>(
     input: &'a str,
-) -> IResult<&'a str, Vec<AnimationOptionKind>, SerikoParseError> {
+) -> IResult<&'a str, Vec<AnimationOptionKind>, ShellParseError> {
     map(
         tuple((
             animation_option_kind_temps,
@@ -75,13 +76,13 @@ fn animation_option_kinds<'a>(
 
 fn animation_option_kind_temps<'a>(
     input: &'a str,
-) -> IResult<&'a str, Vec<AnimationOptionKindTemp>, SerikoParseError> {
+) -> IResult<&'a str, Vec<AnimationOptionKindTemp>, ShellParseError> {
     separated_list1(tag("+"), animation_option_kind_temp)(input)
 }
 
 fn animation_option_kind_temp<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationOptionKindTemp, SerikoParseError> {
+) -> IResult<&'a str, AnimationOptionKindTemp, ShellParseError> {
     alt((
         map(tag("exclusive"), |_| AnimationOptionKindTemp::Exclusive),
         map(tag("background"), |_| AnimationOptionKindTemp::Background),

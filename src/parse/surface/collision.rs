@@ -6,15 +6,14 @@ use nom::{
     sequence::{preceded, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     parse::parts::{boolean, digit, digit_neg},
-    CollisionExKind, SerikoParseError, SurfaceCollision, SurfaceCollisionEx,
+    CollisionExKind, SurfaceCollision, SurfaceCollisionEx,
 };
 
-pub(super) fn collision<'a>(
-    input: &'a str,
-) -> IResult<&'a str, SurfaceCollision, SerikoParseError> {
+pub(super) fn collision<'a>(input: &'a str) -> IResult<&'a str, SurfaceCollision, ShellParseError> {
     map(
         tuple((
             preceded(tag("collision"), digit),
@@ -32,7 +31,7 @@ pub(super) fn collision<'a>(
 
 pub(super) fn collision_ex<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceCollisionEx, SerikoParseError> {
+) -> IResult<&'a str, SurfaceCollisionEx, ShellParseError> {
     map(
         tuple((
             tag("collisionex"),
@@ -44,7 +43,7 @@ pub(super) fn collision_ex<'a>(
     )(input)
 }
 
-fn collision_ex_kind<'a>(input: &'a str) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+fn collision_ex_kind<'a>(input: &'a str) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     alt((
         collision_ex_kind_rect,
         collision_ex_kind_ellipse,
@@ -56,7 +55,7 @@ fn collision_ex_kind<'a>(input: &'a str) -> IResult<&'a str, CollisionExKind, Se
 
 fn collision_ex_kind_rect<'a>(
     input: &'a str,
-) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     map(
         tuple((
             tag("rect"),
@@ -71,7 +70,7 @@ fn collision_ex_kind_rect<'a>(
 
 fn collision_ex_kind_ellipse<'a>(
     input: &'a str,
-) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     map(
         tuple((
             tag("ellipse"),
@@ -88,7 +87,7 @@ fn collision_ex_kind_ellipse<'a>(
 
 fn collision_ex_kind_circle<'a>(
     input: &'a str,
-) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     map(
         tuple((
             tag("circle"),
@@ -102,7 +101,7 @@ fn collision_ex_kind_circle<'a>(
 
 fn collision_ex_kind_polygon<'a>(
     input: &'a str,
-) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     map(
         tuple((tag("polygon"), many1(preceded(tag(","), digit_neg)))),
         |(_, v)| CollisionExKind::Polygon(v),
@@ -111,7 +110,7 @@ fn collision_ex_kind_polygon<'a>(
 
 fn collision_ex_kind_region<'a>(
     input: &'a str,
-) -> IResult<&'a str, CollisionExKind, SerikoParseError> {
+) -> IResult<&'a str, CollisionExKind, ShellParseError> {
     map(
         tuple((
             tag("region"),

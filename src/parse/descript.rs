@@ -1,72 +1,70 @@
 use nom::{branch::alt, bytes::complete::tag, combinator::map, sequence::tuple, IResult};
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{Descript, SortOrder},
     Brace, BraceContainer, DescriptInner,
 };
 
-use super::{
-    parts::{brace_name_func, digit, header_comments_func, inner_brace_func},
-    SerikoParseError,
-};
+use super::parts::{brace_name_func, digit, header_comments_func, inner_brace_func};
 
 pub(super) fn brace_descript<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(descript_name), descript)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::Descript(body)),
     )(input)
 }
 
-fn descript<'a>(input: &'a str) -> IResult<&'a str, Descript, SerikoParseError> {
+fn descript<'a>(input: &'a str) -> IResult<&'a str, Descript, ShellParseError> {
     map(
         tuple((descript_name, inner_brace_func(descript_inner))),
         |(_, lines)| Descript::new(lines),
     )(input)
 }
 
-fn descript_name<'a>(input: &'a str) -> IResult<&'a str, &'a str, SerikoParseError> {
+fn descript_name<'a>(input: &'a str) -> IResult<&'a str, &'a str, ShellParseError> {
     brace_name_func(tag("descript"))(input)
 }
 
-fn descript_inner<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, SerikoParseError> {
+fn descript_inner<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, ShellParseError> {
     alt((version, max_width, collision_sort, animation_sort))(input)
 }
 
-fn version<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, SerikoParseError> {
+fn version<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, ShellParseError> {
     map(tuple((tag("version,"), digit)), |(_, v)| {
         DescriptInner::Version(v)
     })(input)
 }
 
-fn max_width<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, SerikoParseError> {
+fn max_width<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, ShellParseError> {
     map(tuple((tag("maxwidth,"), digit)), |(_, v)| {
         DescriptInner::MaxWidth(v)
     })(input)
 }
 
-fn collision_sort<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, SerikoParseError> {
+fn collision_sort<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, ShellParseError> {
     map(tuple((tag("collision-sort,"), sort_order)), |(_, v)| {
         DescriptInner::CollistionSort(v)
     })(input)
 }
 
-fn animation_sort<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, SerikoParseError> {
+fn animation_sort<'a>(input: &'a str) -> IResult<&'a str, DescriptInner, ShellParseError> {
     map(tuple((tag("animation-sort,"), sort_order)), |(_, v)| {
         DescriptInner::AnimationSort(v)
     })(input)
 }
 
-fn sort_order<'a>(input: &'a str) -> IResult<&'a str, SortOrder, SerikoParseError> {
+fn sort_order<'a>(input: &'a str) -> IResult<&'a str, SortOrder, ShellParseError> {
     alt((sort_order_ascend, sort_order_descend))(input)
 }
 
-fn sort_order_ascend<'a>(input: &'a str) -> IResult<&'a str, SortOrder, SerikoParseError> {
+fn sort_order_ascend<'a>(input: &'a str) -> IResult<&'a str, SortOrder, ShellParseError> {
     map(tag("ascend"), |_| SortOrder::Ascend)(input)
 }
 
-fn sort_order_descend<'a>(input: &'a str) -> IResult<&'a str, SortOrder, SerikoParseError> {
+fn sort_order_descend<'a>(input: &'a str) -> IResult<&'a str, SortOrder, ShellParseError> {
     map(tag("descend"), |_| SortOrder::Descend)(input)
 }
 

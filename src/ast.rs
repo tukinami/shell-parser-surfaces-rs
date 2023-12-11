@@ -1,5 +1,7 @@
 //! AST for `SERIKO`.
 
+use shell_parser_common_rs::charset::Charset;
+
 pub type SurfaceSizeType = u32;
 pub type CoordinateType = i64;
 pub type SurfaceIdType = u32;
@@ -17,14 +19,6 @@ pub struct Seriko {
     charset: Charset,
     braces: Vec<BraceContainer>,
     footer_comments: Vec<CommentLine>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Charset {
-    ASCII,
-    ShiftJIS,
-    UTF8,
-    Default,
 }
 
 #[derive(Debug, Clone, PartialEq)]

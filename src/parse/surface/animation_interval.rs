@@ -2,21 +2,22 @@ use nom::{
     branch::alt, bytes::complete::tag, combinator::map, multi::separated_list1, sequence::tuple,
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{AnimationInterval, SurfaceAnimationInterval},
-    parse::{parts::digit, SerikoParseError},
+    parse::parts::digit,
 };
 
 pub(super) fn animation_interval<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationInterval, ShellParseError> {
     alt((animation_interval_v0, animation_interval_v1))(input)
 }
 
 fn animation_interval_v0<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationInterval, ShellParseError> {
     map(
         tuple((digit, tag("interval,"), animation_interval_defines)),
         |(id, _, intervals)| SurfaceAnimationInterval::new(id, intervals),
@@ -25,7 +26,7 @@ fn animation_interval_v0<'a>(
 
 fn animation_interval_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationInterval, ShellParseError> {
     map(
         tuple((
             tag("animation"),
@@ -39,13 +40,13 @@ fn animation_interval_v1<'a>(
 
 fn animation_interval_defines<'a>(
     input: &'a str,
-) -> IResult<&'a str, Vec<AnimationInterval>, SerikoParseError> {
+) -> IResult<&'a str, Vec<AnimationInterval>, ShellParseError> {
     separated_list1(tag("+"), animation_interval_define)(input)
 }
 
 fn animation_interval_define<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     alt((
         animation_interval_define_sometimes,
         animation_interval_define_rarely,
@@ -62,19 +63,19 @@ fn animation_interval_define<'a>(
 
 fn animation_interval_define_sometimes<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("sometimes"), |_| AnimationInterval::Sometimes)(input)
 }
 
 fn animation_interval_define_rarely<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("rarely"), |_| AnimationInterval::Rarely)(input)
 }
 
 fn animation_interval_define_random<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tuple((tag("random,"), digit)), |(_, v)| {
         AnimationInterval::Random(v)
     })(input)
@@ -82,7 +83,7 @@ fn animation_interval_define_random<'a>(
 
 fn animation_interval_define_periodic<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tuple((tag("periodic,"), digit)), |(_, v)| {
         AnimationInterval::Periodic(v)
     })(input)
@@ -90,31 +91,31 @@ fn animation_interval_define_periodic<'a>(
 
 fn animation_interval_define_always<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("always"), |_| AnimationInterval::Always)(input)
 }
 
 fn animation_interval_define_runonce<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("runonce"), |_| AnimationInterval::Runonce)(input)
 }
 
 fn animation_interval_define_never<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("never"), |_| AnimationInterval::Never)(input)
 }
 
 fn animation_interval_define_yen_e<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("yen-e"), |_| AnimationInterval::YenE)(input)
 }
 
 fn animation_interval_define_talk<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tuple((tag("talk,"), digit)), |(_, v)| {
         AnimationInterval::Talk(v)
     })(input)
@@ -122,7 +123,7 @@ fn animation_interval_define_talk<'a>(
 
 fn animation_interval_define_bind<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationInterval, SerikoParseError> {
+) -> IResult<&'a str, AnimationInterval, ShellParseError> {
     map(tag("bind"), |_| AnimationInterval::Bind)(input)
 }
 

@@ -5,29 +5,27 @@ use nom::{
     sequence::{delimited, terminated, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{SurfaceAlias, SurfaceAliasInner},
     Brace, BraceContainer, SurfaceTargetCharacterId,
 };
 
-use super::{
-    parts::{
-        brace_name_func, digit, header_comments_func, inner_brace_func, surface_target_character_id,
-    },
-    SerikoParseError,
+use super::parts::{
+    brace_name_func, digit, header_comments_func, inner_brace_func, surface_target_character_id,
 };
 
 pub(super) fn brace_surface_alias<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(surface_alias_name), surface_alias)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::SurfaceAlias(body)),
     )(input)
 }
 
-fn surface_alias<'a>(input: &'a str) -> IResult<&'a str, SurfaceAlias, SerikoParseError> {
+fn surface_alias<'a>(input: &'a str) -> IResult<&'a str, SurfaceAlias, ShellParseError> {
     map(
         tuple((surface_alias_name, inner_brace_func(surface_alias_inner))),
         |(id, lines)| SurfaceAlias::new(id, lines),
@@ -36,16 +34,14 @@ fn surface_alias<'a>(input: &'a str) -> IResult<&'a str, SurfaceAlias, SerikoPar
 
 fn surface_alias_name<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     brace_name_func(terminated(
         surface_target_character_id,
         tag(".surface.alias"),
     ))(input)
 }
 
-fn surface_alias_inner<'a>(
-    input: &'a str,
-) -> IResult<&'a str, SurfaceAliasInner, SerikoParseError> {
+fn surface_alias_inner<'a>(input: &'a str) -> IResult<&'a str, SurfaceAliasInner, ShellParseError> {
     map(
         tuple((
             is_not("},\r\n"),

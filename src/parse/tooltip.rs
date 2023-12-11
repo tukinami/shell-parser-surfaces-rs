@@ -4,10 +4,9 @@ use nom::{
     sequence::{terminated, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
-use crate::{
-    Brace, BraceContainer, SerikoParseError, SurfaceTargetCharacterId, Tooltip, TooltipInner,
-};
+use crate::{Brace, BraceContainer, SurfaceTargetCharacterId, Tooltip, TooltipInner};
 
 use super::parts::{
     brace_name_func, header_comments_func, inner_brace_func, surface_target_character_id,
@@ -15,27 +14,25 @@ use super::parts::{
 
 pub(super) fn brace_tooltip<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(tooltip_name), tooltip)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::Tooltip(body)),
     )(input)
 }
 
-fn tooltip<'a>(input: &'a str) -> IResult<&'a str, Tooltip, SerikoParseError> {
+fn tooltip<'a>(input: &'a str) -> IResult<&'a str, Tooltip, ShellParseError> {
     map(
         tuple((tooltip_name, inner_brace_func(tooltip_inner))),
         |(id, lines)| Tooltip::new(id, lines),
     )(input)
 }
 
-fn tooltip_name<'a>(
-    input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+fn tooltip_name<'a>(input: &'a str) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     brace_name_func(terminated(surface_target_character_id, tag(".tooltips")))(input)
 }
 
-fn tooltip_inner<'a>(input: &'a str) -> IResult<&'a str, TooltipInner, SerikoParseError> {
+fn tooltip_inner<'a>(input: &'a str) -> IResult<&'a str, TooltipInner, ShellParseError> {
     map(
         tuple((terminated(is_not(",\r\n"), tag(",")), is_not("\r\n"))),
         |(collision, description): (&'a str, &'a str)| {

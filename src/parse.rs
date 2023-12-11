@@ -11,7 +11,7 @@ use nom::{
     IResult,
 };
 
-use crate::{decoding::decode, BraceContainer, Seriko};
+use crate::{BraceContainer, Seriko};
 
 use self::{
     charset::charset,
@@ -77,7 +77,7 @@ pub fn decode_bytes<'a>(input: &'a [u8]) -> Result<Cow<'a, str>, String> {
         Err(e) => return Err(e.to_string()),
     };
 
-    match decode(input, &charset) {
+    match charset.decode(input) {
         Ok(v) => Ok(v),
         Err(_) => Err(format!("Encoding failed: to {:?}", charset)),
     }
@@ -189,7 +189,8 @@ animation0.pattern3,overlay,-1,100,168,67
 
     mod parse {
 
-        use crate::{ast::Charset, Brace};
+        use crate::Brace;
+        use shell_parser_common_rs::charset::Charset;
 
         use super::*;
 
@@ -287,7 +288,8 @@ descript
     }
 
     mod seriko {
-        use crate::{ast::Charset, Brace};
+        use crate::Brace;
+        use shell_parser_common_rs::charset::Charset;
 
         use super::*;
 

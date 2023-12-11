@@ -1,12 +1,13 @@
 use std::str::FromStr;
 
 use nom::{bytes::complete::tag, combinator::map, sequence::tuple, IResult};
+use shell_parser_common_rs::ShellParseError;
 
-use crate::{parse::parts::digit_neg, SerikoParseError, SurfaceInner};
+use crate::{parse::parts::digit_neg, SurfaceInner};
 
 pub(super) fn sakura_balloon_offset_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("sakura.balloon.offsetx,", |v| {
         SurfaceInner::SakuraBalloonOffsetX(v)
     })(input)
@@ -14,7 +15,7 @@ pub(super) fn sakura_balloon_offset_x<'a>(
 
 pub(super) fn sakura_balloon_offset_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("sakura.balloon.offsety,", |v| {
         SurfaceInner::SakuraBalloonOffsetY(v)
     })(input)
@@ -22,7 +23,7 @@ pub(super) fn sakura_balloon_offset_y<'a>(
 
 pub(super) fn kero_balloon_offset_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("kero.balloon.offsetx,", |v| {
         SurfaceInner::KeroBalloonOffsetX(v)
     })(input)
@@ -30,7 +31,7 @@ pub(super) fn kero_balloon_offset_x<'a>(
 
 pub(super) fn kero_balloon_offset_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("kero.balloon.offsety,", |v| {
         SurfaceInner::KeroBalloonOffsetY(v)
     })(input)
@@ -38,31 +39,31 @@ pub(super) fn kero_balloon_offset_y<'a>(
 
 pub(super) fn balloon_offset_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("balloon.offsetx,", |v| SurfaceInner::BalloonOffsetX(v))(input)
 }
 
 pub(super) fn balloon_offset_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("balloon.offsety,", |v| SurfaceInner::BalloonOffsetY(v))(input)
 }
 
 pub(super) fn point_center_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.centerx,", |v| SurfaceInner::PointCenterX(v))(input)
 }
 
 pub(super) fn point_center_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.centery,", |v| SurfaceInner::PointCenterY(v))(input)
 }
 
 pub(super) fn point_kinoko_center_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.kinoko.centerx,", |v| {
         SurfaceInner::PointKinokoCenterX(v)
     })(input)
@@ -70,7 +71,7 @@ pub(super) fn point_kinoko_center_x<'a>(
 
 pub(super) fn point_kinoko_center_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.kinoko.centery,", |v| {
         SurfaceInner::PointKinokoCenterY(v)
     })(input)
@@ -78,20 +79,20 @@ pub(super) fn point_kinoko_center_y<'a>(
 
 pub(super) fn point_basepos_x<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.basepos.x,", |v| SurfaceInner::PointBaseposX(v))(input)
 }
 
 pub(super) fn point_basepos_y<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     offset_base("point.basepos.y,", |v| SurfaceInner::PointBaseposY(v))(input)
 }
 
 fn offset_base<'a, F, T, O>(
     t: &'static str,
     mut f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>
+) -> impl FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>
 where
     F: FnMut(O) -> T,
     O: FromStr + std::ops::Neg<Output = O>,

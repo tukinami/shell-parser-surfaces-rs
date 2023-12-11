@@ -9,16 +9,17 @@ use nom::{
     sequence::{preceded, terminated, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
-use crate::{CommentLine, LineContainer, SerikoParseError, SurfaceTargetCharacterId};
+use crate::{CommentLine, LineContainer, SurfaceTargetCharacterId};
 
-pub(super) fn newline_body<'a>(input: &'a str) -> IResult<&'a str, &'a str, SerikoParseError> {
+pub(super) fn newline_body<'a>(input: &'a str) -> IResult<&'a str, &'a str, ShellParseError> {
     alt((tag("\r\n"), tag("\r"), tag("\n")))(input)
 }
 
 pub(super) fn whole_line_without_newline<'a>(
     input: &'a str,
-) -> IResult<&'a str, String, SerikoParseError> {
+) -> IResult<&'a str, String, ShellParseError> {
     map(
         alt((
             map(newline_body, |_v| ""),
@@ -33,15 +34,15 @@ pub(super) fn whole_line_without_newline<'a>(
 
 pub(super) fn whole_line_as_comment_line<'a>(
     input: &'a str,
-) -> IResult<&'a str, CommentLine, SerikoParseError> {
+) -> IResult<&'a str, CommentLine, ShellParseError> {
     map(whole_line_without_newline, |v| CommentLine::new(v))(input)
 }
 
 pub(super) fn parse_inner_line_func<'a, T, F>(
     f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, LineContainer<T>, SerikoParseError>
+) -> impl FnMut(&'a str) -> IResult<&'a str, LineContainer<T>, ShellParseError>
 where
-    F: FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>,
+    F: FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>,
 {
     alt((
         map(tuple((space0, f, space0, newline_body)), |(_, v, _, _)| {
@@ -53,14 +54,14 @@ where
     ))
 }
 
-pub(super) fn digit<'a, T>(input: &'a str) -> IResult<&'a str, T, SerikoParseError>
+pub(super) fn digit<'a, T>(input: &'a str) -> IResult<&'a str, T, ShellParseError>
 where
     T: FromStr,
 {
     map_res(digit1, |v: &'a str| v.parse())(input)
 }
 
-pub(super) fn digit_neg<'a, T>(input: &'a str) -> IResult<&'a str, T, SerikoParseError>
+pub(super) fn digit_neg<'a, T>(input: &'a str) -> IResult<&'a str, T, ShellParseError>
 where
     T: FromStr + std::ops::Neg<Output = T>,
 {
@@ -73,13 +74,13 @@ where
     })(input)
 }
 
-pub(super) fn boolean<'a>(input: &'a str) -> IResult<&'a str, bool, SerikoParseError> {
+pub(super) fn boolean<'a>(input: &'a str) -> IResult<&'a str, bool, ShellParseError> {
     alt((map(tag("true"), |_| true), map(tag("false"), |_| false)))(input)
 }
 
 pub(super) fn surface_target_character_id<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     alt((
         surface_target_character_id_sakura,
         surface_target_character_id_kero,
@@ -89,19 +90,19 @@ pub(super) fn surface_target_character_id<'a>(
 
 fn surface_target_character_id_sakura<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     map(tag("sakura"), |_| SurfaceTargetCharacterId::Sakura)(input)
 }
 
 fn surface_target_character_id_kero<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     map(tag("kero"), |_| SurfaceTargetCharacterId::Kero)(input)
 }
 
 fn surface_target_character_id_char<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceTargetCharacterId, SerikoParseError> {
+) -> IResult<&'a str, SurfaceTargetCharacterId, ShellParseError> {
     map(tuple((tag("char"), digit)), |(_, v)| {
         SurfaceTargetCharacterId::Char(v)
     })(input)
@@ -109,27 +110,27 @@ fn surface_target_character_id_char<'a>(
 
 pub(super) fn header_comments_func<'a, T, F>(
     f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<CommentLine>, SerikoParseError>
+) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<CommentLine>, ShellParseError>
 where
-    F: FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>,
+    F: FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>,
 {
     many0(map(tuple((not(f), whole_line_as_comment_line)), |(_, v)| v))
 }
 
 pub(super) fn brace_name_func<'a, T, F>(
     f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>
+) -> impl FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>
 where
-    F: FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>,
+    F: FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>,
 {
     preceded(space0, terminated(f, tuple((space0, newline_body))))
 }
 
 pub(super) fn inner_brace_func<'a, T, F>(
     f: F,
-) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<LineContainer<T>>, SerikoParseError>
+) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<LineContainer<T>>, ShellParseError>
 where
-    F: FnMut(&'a str) -> IResult<&'a str, T, SerikoParseError>,
+    F: FnMut(&'a str) -> IResult<&'a str, T, ShellParseError>,
 {
     map(
         tuple((
@@ -466,12 +467,12 @@ mod tests {
             let case_t_func = tag("abc");
             let mut case_func = inner_brace_func(case_t_func);
 
-            let case = r#"    {    
+            let case = r#"    {
     bbb
     abc
-abc    
-bbb    
-    }    
+abc
+bbb
+    }
 
 {
 }"#;
@@ -488,7 +489,7 @@ bbb
                     LineContainer::Comment(CommentLine::new("bbb".to_string())),
                     LineContainer::Body("abc"),
                     LineContainer::Body("abc"),
-                    LineContainer::Comment(CommentLine::new("bbb    ".to_string())),
+                    LineContainer::Comment(CommentLine::new("bbb".to_string())),
                 ]
             );
 

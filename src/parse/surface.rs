@@ -7,10 +7,9 @@ use nom::{
     sequence::{preceded, separated_pair},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
-use crate::{
-    Brace, BraceContainer, SerikoParseError, Surface, SurfaceAppend, SurfaceId, SurfaceInner,
-};
+use crate::{Brace, BraceContainer, Surface, SurfaceAppend, SurfaceId, SurfaceInner};
 
 use self::{
     animation_collision::{animation_collision, animation_collision_ex},
@@ -39,83 +38,83 @@ mod offset;
 
 pub(super) fn brace_surface<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(surface_name), surface)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::Surface(body)),
     )(input)
 }
 
-fn surface<'a>(input: &'a str) -> IResult<&'a str, Surface, SerikoParseError> {
+fn surface<'a>(input: &'a str) -> IResult<&'a str, Surface, ShellParseError> {
     map(
         tuple((surface_name, inner_brace_func(surface_inner))),
         |(ids, lines)| Surface::new(ids, lines),
     )(input)
 }
 
-fn surface_name<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, SerikoParseError> {
+fn surface_name<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, ShellParseError> {
     alt((surface_bracename_ssp, surface_bracename_materia))(input)
 }
 
 pub(super) fn brace_surface_append<'a>(
     input: &'a str,
-) -> IResult<&'a str, BraceContainer, SerikoParseError> {
+) -> IResult<&'a str, BraceContainer, ShellParseError> {
     map(
         tuple((header_comments_func(surface_append), surface_append)),
         |(header_comments, body)| BraceContainer::new(header_comments, Brace::SurfaceAppend(body)),
     )(input)
 }
 
-fn surface_append<'a>(input: &'a str) -> IResult<&'a str, SurfaceAppend, SerikoParseError> {
+fn surface_append<'a>(input: &'a str) -> IResult<&'a str, SurfaceAppend, ShellParseError> {
     map(
         tuple((surface_append_name, inner_brace_func(surface_inner))),
         |(ids, lines)| SurfaceAppend::new(ids, lines),
     )(input)
 }
 
-fn surface_append_name<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, SerikoParseError> {
+fn surface_append_name<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, ShellParseError> {
     brace_name_func(preceded(tag("surface.append"), surface_ids))(input)
 }
 
-fn surface_bracename_ssp<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, SerikoParseError> {
+fn surface_bracename_ssp<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, ShellParseError> {
     brace_name_func(preceded(tag("surface"), surface_ids))(input)
 }
 
 fn surface_bracename_materia<'a>(
     input: &'a str,
-) -> IResult<&'a str, Vec<SurfaceId>, SerikoParseError> {
+) -> IResult<&'a str, Vec<SurfaceId>, ShellParseError> {
     brace_name_func(separated_list1(
         tag(","),
         preceded(tag("surface"), surface_id_unit),
     ))(input)
 }
 
-fn surface_ids<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, SerikoParseError> {
+fn surface_ids<'a>(input: &'a str) -> IResult<&'a str, Vec<SurfaceId>, ShellParseError> {
     separated_list1(tag(","), surface_id)(input)
 }
 
-fn surface_id<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, SerikoParseError> {
+fn surface_id<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, ShellParseError> {
     alt((surface_id_not, surface_id_range, surface_id_unit))(input)
 }
 
-fn surface_id_unit<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, SerikoParseError> {
+fn surface_id_unit<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, ShellParseError> {
     map(digit, |v| SurfaceId::Unit(v))(input)
 }
 
-fn surface_id_range<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, SerikoParseError> {
+fn surface_id_range<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, ShellParseError> {
     map(separated_pair(digit, tag("-"), digit), |(v1, v2)| {
         SurfaceId::Range(v1, v2)
     })(input)
 }
 
-fn surface_id_not<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, SerikoParseError> {
+fn surface_id_not<'a>(input: &'a str) -> IResult<&'a str, SurfaceId, ShellParseError> {
     map(
         preceded(tag("!"), alt((surface_id_range, surface_id_unit))),
         |v| SurfaceId::Not(Box::new(v)),
     )(input)
 }
 
-fn surface_inner<'a>(input: &'a str) -> IResult<&'a str, SurfaceInner, SerikoParseError> {
+fn surface_inner<'a>(input: &'a str) -> IResult<&'a str, SurfaceInner, ShellParseError> {
     alt((
         map(element, |v| SurfaceInner::Element(v)),
         map(animation_interval, |v| SurfaceInner::AnimationInterval(v)),

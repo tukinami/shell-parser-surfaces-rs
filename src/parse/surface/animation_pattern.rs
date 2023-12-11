@@ -5,29 +5,27 @@ use nom::{
     sequence::{preceded, tuple},
     IResult,
 };
+use shell_parser_common_rs::ShellParseError;
 
 use crate::{
     ast::{
         AnimationPatternDrawMethod, AnimationPatternProperty, SurfaceAnimationPattern,
         SurfaceIdPointerType,
     },
-    parse::{
-        parts::{digit, digit_neg},
-        SerikoParseError,
-    },
+    parse::parts::{digit, digit_neg},
 };
 
 use super::draw_method::{draw_method, draw_method_on_animation};
 
 pub(super) fn animation_pattern<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationPattern, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationPattern, ShellParseError> {
     alt((animation_pattern_v0, animation_pattern_v1))(input)
 }
 
 fn animation_pattern_v0<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationPattern, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationPattern, ShellParseError> {
     map(
         tuple((
             digit,
@@ -44,7 +42,7 @@ fn animation_pattern_v0<'a>(
 
 fn animation_pattern_draw_method_normal_v0<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationPatternDrawMethod, SerikoParseError> {
+) -> IResult<&'a str, AnimationPatternDrawMethod, ShellParseError> {
     map(
         tuple((
             preceded(tag(","), digit_neg),
@@ -62,7 +60,7 @@ fn animation_pattern_draw_method_normal_v0<'a>(
 
 fn animation_pattern_draw_method_animation_v0<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationPatternDrawMethod, SerikoParseError> {
+) -> IResult<&'a str, AnimationPatternDrawMethod, ShellParseError> {
     map(
         tuple((
             preceded(tag(","), digit_neg::<SurfaceIdPointerType>),
@@ -75,7 +73,7 @@ fn animation_pattern_draw_method_animation_v0<'a>(
 
 fn animation_pattern_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, SurfaceAnimationPattern, SerikoParseError> {
+) -> IResult<&'a str, SurfaceAnimationPattern, ShellParseError> {
     map(
         tuple((
             preceded(tag("animation"), digit),
@@ -91,7 +89,7 @@ fn animation_pattern_v1<'a>(
 
 fn animation_pattern_draw_method_normal_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationPatternDrawMethod, SerikoParseError> {
+) -> IResult<&'a str, AnimationPatternDrawMethod, ShellParseError> {
     map(
         tuple((
             preceded(tag(","), draw_method),
@@ -103,7 +101,7 @@ fn animation_pattern_draw_method_normal_v1<'a>(
 
 fn animation_pattern_draw_method_animation_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationPatternDrawMethod, SerikoParseError> {
+) -> IResult<&'a str, AnimationPatternDrawMethod, ShellParseError> {
     map(preceded(tag(","), draw_method_on_animation), |v| {
         AnimationPatternDrawMethod::Animation(v)
     })(input)
@@ -111,7 +109,7 @@ fn animation_pattern_draw_method_animation_v1<'a>(
 
 fn animation_pattern_property_v1<'a>(
     input: &'a str,
-) -> IResult<&'a str, AnimationPatternProperty, SerikoParseError> {
+) -> IResult<&'a str, AnimationPatternProperty, ShellParseError> {
     map(
         tuple((
             preceded(tag(","), digit_neg),

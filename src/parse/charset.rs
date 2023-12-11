@@ -2,39 +2,26 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::space0,
-    combinator::{eof, map},
+    combinator::eof,
     sequence::{preceded, terminated, tuple},
     IResult,
 };
-
-use crate::{Charset, SerikoParseError};
+use shell_parser_common_rs::{
+    charset::{parse_charset, Charset},
+    ShellParseError,
+};
 
 use super::parts::newline_body;
 
-pub(super) fn charset<'a>(input: &'a str) -> IResult<&'a str, Charset, SerikoParseError> {
+pub(super) fn charset<'a>(input: &'a str) -> IResult<&'a str, Charset, ShellParseError> {
     preceded(
         space0,
         terminated(charset_body, tuple((space0, alt((newline_body, eof))))),
     )(input)
 }
 
-fn charset_body<'a>(input: &'a str) -> IResult<&'a str, Charset, SerikoParseError> {
-    preceded(
-        tag("charset,"),
-        alt((charset_ascii, charset_shift_jis, charset_utf_8)),
-    )(input)
-}
-
-fn charset_ascii<'a>(input: &'a str) -> IResult<&'a str, Charset, SerikoParseError> {
-    map(tag("ASCII"), |_| Charset::ASCII)(input)
-}
-
-fn charset_shift_jis<'a>(input: &'a str) -> IResult<&'a str, Charset, SerikoParseError> {
-    map(tag("Shift_JIS"), |_| Charset::ShiftJIS)(input)
-}
-
-fn charset_utf_8<'a>(input: &'a str) -> IResult<&'a str, Charset, SerikoParseError> {
-    map(tag("UTF-8"), |_| Charset::UTF8)(input)
+fn charset_body<'a>(input: &'a str) -> IResult<&'a str, Charset, ShellParseError> {
+    preceded(tag("charset,"), parse_charset)(input)
 }
 
 #[cfg(test)]

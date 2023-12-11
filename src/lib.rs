@@ -43,7 +43,6 @@
 //! ```
 
 pub mod ast;
-pub(crate) mod decoding;
 pub mod parse;
 
 pub use ast::*;
